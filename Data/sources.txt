@@ -1,0 +1,29 @@
+SOUTHEAST ASIAN CLIMATE ASSESSMENT & DATASET (SACA&D), file created on 26-08-2026
+THESE DATA CAN BE USED FREELY PROVIDED THAT THE FOLLOWING SOURCE IS ACKNOWLEDGED:
+
+Klein Tank, A.M.G. and Coauthors, 2011. Daily dataset for climate extremes
+analyses in Southeast Asia.
+In preparation
+Data and metadata available at http://saca-bmkg.knmi.nl
+
+FILE FORMAT (MISSING VALUE CODE IS -9999):
+
+ 01- 05 STAID  : Station identifier
+ 07- 12 SOUID  : Source identifier
+ 14- 53 SOUNAME: Source name
+ 55- 56 CN     : Country code (ISO3116 country codes)
+ 58- 66 LAT    : Latitude in degrees:minutes:seconds (+: North, -: South)
+ 68- 76 LON    : Longitude in degrees:minutes:seconds (+: East, -: West)
+ 78- 81 HGTH   : Station elevation in meters
+ 83- 86 ELEI   : Element identifier (see website at Daily Data > Data dictionary > Elements)
+ 88- 95 BEGIN  : Begin date YYYYMMDD
+ 97-104 END    : End date YYYYMMDD
+106-110 PARID  : Participant identifier
+112-162 PARNAME: Participant name
+
+STAID, SOUID,SOUNAME                                 ,CN,      LAT,      LON,HGHT,ELEI,   BEGIN,     END,PARID,PARNAME
+
+ 2842,101812,KUANTAN                                 ,MY,+03:37:12,+103:13:12,  16, TG4,19680101,19920113,   25,GHCND                                             
+ 2842,948657,KUANTAN                                 ,MY,+03:47:00,+103:13:00,  16, TG4,19541002,20151231,     ,                    
+  718,104869,LABUAN                                  ,MY,+05:18:00,+115:15:00,  30, TG4,19550101,20130308,   25,GHCND                                             
+  718,996465,LABUAN                                  ,MY,+05:18:00,+115:15:00,  30, TG4,19550101,20151231,     ,                    
