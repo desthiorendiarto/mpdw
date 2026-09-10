@@ -7,6 +7,7 @@ output:
 ---
 
 # Library
+
 ```{r}
 library(dLagM)
 library(dynlm)
@@ -16,6 +17,7 @@ library(car)
 ```
 
 # Data
+
 ```{r}
 data <- read.csv("C:\\Dokumen\\Kuliah IPB\\Semester 5\\Metode Peramalan Deret Waktu\\Praktikum\\File R\\mpdw\\Pertemuan 3\\NewDelhi_Air_quality.csv")
 
@@ -26,11 +28,13 @@ train.ts <- ts(train)
 test.ts <- ts(test)
 data.ts <- ts(data)
 ```
+
 Variabel yang digunakan yaitu AQI sebagai Y dan CO sebagai X
 
 # Model Koyck
 
 ## Pemodelan
+
 ```{r}
 # Membangun Model Koyck
 model.koyck <- koyckDlm(x = train$CO, y = train$AQI)
@@ -44,6 +48,7 @@ summary(koyck_lm)
 ```
 
 ## Peramalan
+
 ```{r}
 # Meramalkan 15 periode ke depan
 fore.koyck <- forecast(model = model.koyck, x = test$CO, h = 15)
@@ -51,6 +56,7 @@ fore.koyck
 ```
 
 ## Akurasi
+
 ```{r}
 # (MAPE dan Deviance) pada data testing
 mape.koyck <- MAPE(fore.koyck$forecasts, test$AQI)
@@ -63,6 +69,7 @@ cat("deviance Model Koyck:", dev.koyck, "\n")
 # Regression with Distributed Lag (DLM)
 
 ## Penentuan Lag Optimum
+
 ```{r}
 finiteDLMauto(formula = AQI ~ CO,
               data = data.frame(train), q.min = 1, q.max = 10,
@@ -72,6 +79,7 @@ finiteDLMauto(formula = AQI ~ CO,
 Lag optimum berada pada q = 10
 
 ## Pemodelan dengan lag Optimum
+
 ```{r}
 # Model dengan q = 10
 model.dlm.opt <- dlm(x = train$CO, y = train$AQI, q = 10)
@@ -84,7 +92,6 @@ dlm_lm <- dynlm(AQI ~ L(CO, 0:10), data = train.ts)
 summary(dlm_lm)
 ```
 
-
 ```{r}
 # Peramalan model DLM Optimum
 fore.dlm.opt <- forecast(model = model.dlm.opt, x = test$CO, h = 15)
@@ -92,6 +99,7 @@ fore.dlm.opt
 ```
 
 ## Akurasi
+
 ```{r}
 # MAPE dan Deviance
 mape.dlm.opt <- MAPE(fore.dlm.opt$forecasts, test$AQI)
@@ -104,6 +112,7 @@ cat("Deviance Model DLM Optimum:", dev.dlm, "\n")
 # Autoregressive Distributed Lag (ARDL)
 
 ## Penentuan Lag Optimum
+
 ```{r}
 model.ardl.opt <- ardlBoundOrders(data = data.frame(data), ic = "AIC", formula = AQI ~ CO)
 
@@ -121,6 +130,7 @@ data.frame("Lag_Y_opt(q)" = q_opt, "Lag_X_opt(p)" = p_opt, "AIC" = model.ardl.op
 Lag Optimum berada pada p = 15 dan q = 6
 
 ## Pemodelan dengan Lag Optimum
+
 ```{r}
 # Model ARDL dengan lag X = 15 dan lag Y = 6
 model.ardl <- ardlDlm(formula = AQI ~ CO, data = train, p = 15, q = 6)
@@ -140,6 +150,7 @@ fore.ardl
 ```
 
 ## Akurasi
+
 ```{r}
 # MAPE dan Deviance
 mape.ardl <- MAPE(fore.ardl$forecasts, test$AQI)
@@ -150,8 +161,11 @@ cat("deviance Model ARDL (15,6):", dev.ardl,"\n")
 ```
 
 # Uji Asumsi Model
+
 ## Uji Autokorelasi (Durbin-Watson)
+
 H0: Tidak ada autokorelasi
+
 ```{r}
 # Model Koyck
 dwtest(koyck_lm)
@@ -162,7 +176,9 @@ dwtest(ardl_lm)
 ```
 
 ## Uji Heteroskedastisitas (Breusch-Pagan)
+
 H0: Ragam sisaan homogen
+
 ```{r}
 # Model Koyck
 bptest(koyck_lm)
@@ -173,7 +189,9 @@ bptest(ardl_lm)
 ```
 
 ## Uji Normalitas (Shapiro-Wilk)
+
 H0: Sisaan berdistribusi normal
+
 ```{r}
 # Model Koyck
 shapiro.test(residuals(koyck_lm))
@@ -183,10 +201,12 @@ shapiro.test(residuals(dlm_lm))
 shapiro.test(residuals(ardl_lm))
 ```
 
-Hasil uji menunjukkan bahwa model ARDL menghasilkan p-value > 0.05 pada uji autokorelasi, heteroskedastisitas, dan normalitas maka tak cukup bukti uuntuk menolak H0 pada ketiga uji tersebut. sedangkan model Koyck dan DLM menghasilkan p-value > 0.05 pada uji heteroskedastisitas dan normalitas dan p-value < 0.05 pada uji autokorelasi maka artinya tak cukup bukti untuk menolak H0 pada uji heteroskedastisitas dan normalitas sedangkan tolak H0 pada uji autokorelasi. Hal ini berarti model ARDL meemnuhi ketiga asumsi tersebuts sedangkan model Koyck dan DLM hanya memenuhi asumsi heteroskedastisitas dn normalitas.
+Hasil uji menunjukkan bahwa model ARDL menghasilkan p-value \> 0.05 pada uji autokorelasi, heteroskedastisitas, dan normalitas maka tak cukup bukti uuntuk menolak H0 pada ketiga uji tersebut. sedangkan model Koyck dan DLM menghasilkan p-value \> 0.05 pada uji heteroskedastisitas dan normalitas dan p-value \< 0.05 pada uji autokorelasi maka artinya tak cukup bukti untuk menolak H0 pada uji heteroskedastisitas dan normalitas sedangkan tolak H0 pada uji autokorelasi. Hal ini berarti model ARDL meemnuhi ketiga asumsi tersebuts sedangkan model Koyck dan DLM hanya memenuhi asumsi heteroskedastisitas dn normalitas.
 
 # Perbandingan Performa Model
+
 ## Akurasi
+
 ```{r}
 # Ringkasan Akurasi MAPE
 akurasi <- matrix(c(mape.koyck, mape.dlm.opt, mape.ardl))
@@ -201,9 +221,10 @@ colnames(akurasidev) <- c("Deviance")
 print(akurasidev)
 ```
 
-Nilai MAPE dan deviance terbaik adalah nilai yang terkecil. Hasilnya terlihat bahwa model ARDL memiliki nilai MAPE dan deviance yang lebih kecil dibandingkan dengan model Koyck dan DLM. Hal ini berarti model ARDL memberikan kinerja peramalan terbaik diantara ketiga metode tersebut.
+Nilai MAPE dan deviance terbaik adalah nilai yang terkecil. Hasilnya terlihat bahwa model ARDL memiliki nilai MAPE dan deviance yang terkecil dibandingkan dengan model Koyck dan DLM. Hal ini berarti model ARDL memberikan kinerja peramalan terbaik diantara ketiga metode tersebut.
 
 ## Visualisasi
+
 ```{r}
 par(mfrow=c(1,1))
 plot(test$X, test$AQI, type="b", col="black", ylim=c(15,35), lwd=2, 
@@ -217,4 +238,10 @@ legend("topleft", legend=c("Aktual", "Koyck", "DLM Optimum", "ARDL (15,6)"),
        col=c("black","red","blue","green"), lty=1, pch=c(1,16,17,18), cex=0.8, inset=0.02)
 ```
 
+Grafik diatas menunjukkan bahwa garis hasil peramalan model ARDL (15, 6)/garis hijau dan DLM (10)/garis biru paling mendekati garis nilai aktual/garis hitam. Sedangkan garis hasil model Koyck/gairs merah tidak mendekati garis nilai aktual/garis hitam. Hal tersebut berarti model ARDL (15,6) dan DLM(10) memberikan hasil peramalan yang lebih baik dibandingkan dengan model Koyck.
 
+# Kesimpulan
+
+1.  Lag optimum: Lag optimum pada model DLM(q) berada saat q = 10 dan Lag optimum pada model ARDL (p,q) berada saat p = 15 dan q = 6. Sedangkan model Koyck merupakan model yang mengatasi masalah infinite distributed lag, sehingga tidak memerlukan penentuan lag.
+2.   Hasil uji asumsi menunjukkan hanya model ARDL optimum yang memenuhi semua asumsi (asumsi autokorelasi, normalitas, dan heteroskedastisitas). Sementara model DML dan Koyck tidak memenuhi asumsi autokorelasi.
+3.  Berdasarkan nilai MAPE, deviance dan visualisasi grafik, model ARDL optimum memberikan kinerja peramalan terbaik diantara ketiga model tersebut. Hal tersebut ditunjukkan dengan model ARDL yang memiliki nilai MAPE dan deviance terkecil dan garis hasil peramalan yang mendekati garis nilai aktual.
