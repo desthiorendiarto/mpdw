@@ -206,12 +206,12 @@ Nilai MAPE dan deviance terbaik adalah nilai yang terkecil. Hasilnya terlihat ba
 ## Visualisasi
 ```{r}
 par(mfrow=c(1,1))
-plot(test$CO, test$AQI, type="b", col="black", ylim=c(15,35), lwd=2, 
+plot(test$X, test$AQI, type="b", col="black", ylim=c(15,35), lwd=2, 
      ylab="Nilai Y", xlab="Nilai X", main="Perbandingan Model Peramalan")
 
-lines(test$CO, fore.koyck$forecasts, col="red", type="b", pch=16)
-lines(test$CO, fore.dlm.opt$forecasts, col="blue", type="b", pch=17)
-lines(test$CO, fore.ardl$forecasts, col="green", type="b", pch=18)
+lines(test$X, fore.koyck$forecasts, col="red", type="b", pch=16)
+lines(test$X, fore.dlm.opt$forecasts, col="blue", type="b", pch=17)
+lines(test$X, fore.ardl$forecasts, col="green", type="b", pch=18)
 
 legend("topleft", legend=c("Aktual", "Koyck", "DLM Optimum", "ARDL (15,6)"),
        col=c("black","red","blue","green"), lty=1, pch=c(1,16,17,18), cex=0.8, inset=0.02)
