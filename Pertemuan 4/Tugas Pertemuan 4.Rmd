@@ -1,1 +1,447 @@
+---
+title: "Tugas Pertemuan 4"
+author: "Desthio Rendiarto Akhmad M0401241080"
+date: "2026-09-15"
+output: 
+  rmdformats::readthedown
+---
 
+# White Noise
+
+```{r}
+set.seed(1080)
+wn <- rnorm(300)
+ts.plot(wn)
+```
+
+# MA(2)
+
+MA(2) dengan parameter $\theta_1 = 0.4$ dan $\theta_2 = 0.6$ sebanyak 300 observasi.
+
+Model:
+$$ Y_t = e_t + 0.4e_{t-1} + 0.6e_{t-2}$$
+
+## Pembangkitan Data
+
+### Manual
+```{r}
+set.seed(1080)
+ma <- wn[1]
+ma[2] <- wn[2] + 0.4 * wn[1]
+```
+
+```{r}
+for(i in 3:300){
+   ma[i] <- wn[i] + 0.4 * wn[i - 1] + 0.6 * wn[i-2]
+}
+ma
+```
+
+### Dengan arima.sim
+
+```{r}
+ma1 <- arima.sim(list(order=c(0,0,2), ma=c(0.4,0.6)), n=300)
+ma1
+```
+
+## Plot 
+
+### Plot Time Series
+
+```{r}
+ts.plot(ma)
+```
+
+### Plot ACF
+
+```{r}
+acf(ma,lag.max = 20)
+```
+
+### Plot PACF
+
+```{r}
+pacf(ma)
+```
+
+### Plot EACF
+
+```{r}
+TSA::eacf(ma)
+```
+Berdasarkan plot time series, pergerakan data bangkitan berada di sekitar rataan konstan $E[Y_t] = 0$. Hal ini menunjukkan bahwa data MA(2) yang dibangkitkan stasioner dalam rataan.
+
+Plot ACF menunjukkan cut off pada lag ke-2 dan plot PACF menunjukkan tail off dan membentuk gelombang sinus. Hal ini menandakan proses MA(2).
+
+Berdasarkan pola segitiga nol pada plot EACF, terlihat bahwa segitiga nol berada pada AR(0) dan MA(2). Hal ini memperkuat bahwa model teridentifikasi sebagai MA(2).
+
+## Scatter Plot
+
+### Antara $Y_t$ dengan $Y_{t-1}$
+
+```{r}
+#Yt
+yt_ma <- ma[-1]
+yt_ma
+
+#Yt-1
+yt_1_ma <- ma[-300]
+yt_1_ma
+```
+
+```{r}
+plot(y=yt_ma,x=yt_1_ma)
+```
+
+### Antara $Y_t$ dengan $Y_{t-2}$
+
+```{r}
+#Yt
+yt_ma2 <- ma[-c(1,2)]
+yt_ma2
+
+#Yt-2
+yt_2_ma <- ma[-c(299,300)]
+yt_2_ma
+```
+
+```{r}
+plot(y=yt_ma2,x=yt_2_ma)
+```
+
+### Antara $Y_t$ dengan $Y_{t-3}$
+
+```{r}
+#Yt
+yt_ma3 <- ma[-c(1,2,3)]
+yt_ma3
+
+##Yt-3
+yt_3_ma <- ma[-c(298,299,300)]
+yt_3_ma
+```
+
+```{r}
+plot(y=yt_ma3,x=yt_3_ma)
+```
+
+## Autokorelasi
+
+### Antara $Y_t$ dengan $Y_{t-1}$
+
+```{r}
+cor(yt_ma,yt_1_ma)
+```
+
+Korelasi berdasarkan perhitungan teoritis 
+$$ \rho_1 = \frac{-\theta_1+\theta_1\theta_2} {1+\theta_1^2+\theta_2^2} = \frac{-(-0.4)+(-0.4)\times(-0.6)}
+{1+(-0.4)^2+(-0.6)^2} = \frac{0.64}{1.52} = 0.421 $$
+
+### Antara $Y_t$ dengan $Y_{t-2}$
+
+```{r}
+cor(yt_ma2,yt_2_ma)
+```
+
+Korelasi berdasarkan pendekatan teoritis 
+$$ \rho_2 = \frac{-\theta_2} {1+\theta_1^2+\theta_2^2} = \frac{-(-0.6)}
+{1+(0.4)^2+(0.6)^2} = \frac{0.6}{1.52} = 0.395$$
+
+### Antara $Y_t$ dengan $Y_{t-3}$
+
+```{r}
+cor(yt_ma3,yt_3_ma)
+```
+
+Korelasi berdasarkan pendekatan teoritis adalah 0
+
+Berdasarkan Scatter plot:
+
+Hubungan $Y_t$ dan $Y_{t-1}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.388 dan berdekatan dengan korelasi secara teoritis = 0.421.
+
+Hubungan $Y_t$ dan $Y_{t-2}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.411 dan berdekatan dengan korelasi secara teoritis = 0.395.
+
+$Y_t$ dan $Y_{t-3}$ cenderung tidak memiliki hubungan, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan yang mendekati nol dan sesuai dengan pendekatan teoritis ($\rho_k = 0$, $k\ge 3$).
+
+# AR(2)
+
+AR(2) dengan parameter $\phi_1 = 0.5$ dan $\phi_2 = 0.2$ sebanyak 300 obervasi.
+
+Model:
+$$Y_t = e_t + 0.5Y_{t-1} + 0.2Y_{t-2} $$
+
+## Pembangkitan Data
+
+### Manual
+```{r}
+set.seed(1080)
+ar <- wn[1]
+ar[2] <- wn[2] + 0.5*wn[1]
+```
+
+```{r}
+for (i in 3:300) {
+  ar[i] <- wn[i] + 0.5*ar[i-1] + 0.2*ar[i-2]
+  }
+ar
+```
+
+### Dengan arima.sim
+
+```{r}
+ar1 <- arima.sim(list(order=c(2,0,0), ar=c(0.5,0.2)), n=300)
+ar1
+```
+
+## Plot
+
+### Plot Time Series
+
+```{r}
+ts.plot(ar)
+```
+
+### Plot ACF
+
+```{r}
+acf(ar)
+```
+
+### Plot PACF
+
+```{r}
+pacf(ar)
+```
+
+### Plot EACF
+
+```{r}
+TSA::eacf(ar)
+```
+Berdasarkan plot time series, terlihat bahwa data cenderung stasioner dalam rataan. Selain itu persamaan karakteristik AR(2):$1-0.5B-0.2B^2$ akar-akarnya memenuhi syarat kestasioneran $|\phi_2|=|0.2| < 1$, $\phi_1+\phi_2 = 0.7 <1$, dan $\phi_2-\phi_1  = -0.3 <1$.
+
+Plot ACF menunjukkan tail off dan plot ACF mengalami cut off pada lag ke-2. Hal ini menandakan proses AR(2).
+
+Berdasarkan pola segitiga nol pada plot EACF, terlihat bahwa pola berada pada AR(1) dan MA(1). Hal ini menandakan bahwa proses data bangkitan bukan merupakan AR(2)
+
+## Scatter Plot
+### Antara $Y_t$ dengan $Y_{t-1}$
+```{r}
+#Yt
+yt_ar <- ar[-1]
+yt_ar
+
+#Yt-1
+yt_1_ar <- ar[-300]
+yt_1_ar
+```
+
+```{r}
+plot(y=yt_ar,x=yt_1_ar)
+```
+
+### Antara $Y_t$ dengan $Y_{t-2}$
+```{r}
+#Yt
+yt_ar2 <- ar[-c(1,2)]
+yt_ar2
+
+#Yt-2
+yt_2_ar <- ar[-c(299,300)]
+yt_2_ar
+```
+
+```{r}
+plot(y=yt_ar2,x=yt_2_ar)
+```
+
+### Antara $Y_t$ dengan $Y_{t-3}$
+```{r}
+#Yt
+yt_ar3 <- ar[-c(1,2,3)]
+yt_ar3
+
+#Yt-3
+yt_3_ar <- ar[-c(298,299,300)]
+yt_3_ar
+```
+
+```{r}
+plot(y=yt_ar3,x=yt_3_ar)
+```
+
+## Autokorelasi
+### Antara $Y_t$ dengan $Y_{t-1}$
+```{r}
+cor(yt_ar,yt_1_ar)
+```
+
+Korelasi berdasarkan pendekatan teoritis 
+$\rho_1 = \frac {\phi_1} {1-\phi_2} = \frac{0.5}{1-0.2} = \frac{0.5} {0.8} = 0.625$
+
+### Antara $Y_t$ dengan $Y_{t-2}$
+```{r}
+cor(yt_ar2,yt_2_ar)
+```
+
+Korelasi berdasarkan pendekatan teoritis 
+$\rho_2 = \phi_1\rho_1 + \phi_2 = 0.5\times0.625 + 0.2 = 0.5125$
+
+### Antara $Y_t$ dengan $Y_{t-3}$
+```{r}
+cor(yt_ar3,yt_3_ar)
+```
+
+Korelasi berdasarkan pendekatan teoritis 
+$\rho_3 = \phi_1\rho_2 + \phi_2\rho_1 = 0.5\times0.625 + 0.2\times0.5125 = 0.38125$
+
+Berdasarkan Scatter plot:
+
+Hubungan $Y_t$ dan $Y_{t-1}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.608 dan berdekatan dengan korelasi secara teoritis = 0.625.
+
+Hubungan $Y_t$ dan $Y_{t-2}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.537 dan berdekatan dengan korelasi secara teoritis = 0.513.
+
+Hubungan $Y_t$ dan $Y_{t-3}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.425 dan berdekatan dengan nilai korelasi secara teoritis = 0.381.
+
+# ARMA(2,2)
+
+ARMA (2,2) dengan parameter $\theta_1 = 0.4$, $\theta_2 = 0.6$, $\phi_1 = 0.5$, dan $\phi_2 = 0.2$ sebanyak 300 observasi.
+
+Model:
+$$Y_t = 0.5Y_{t-1} + 0.2Y_{t-2} + e_t + 0.4e_{t-1} + 0.6e_{t-2}$$
+
+## Pembangkitan Data
+
+### Manual
+
+```{r}
+set.seed(1080)
+arma <- numeric(300)
+
+arma[1] <- wn[1]
+arma[2] <- 0.5 * arma[1] + wn[2] + 0.4 * wn[1]
+
+for (i in 3:300) {
+  arma[i] <- 0.5 * arma[i - 1] + 0.2 * arma[i - 2] + 
+                      wn[i] + 0.4 * wn[i - 1] + 0.6 * wn[i - 2]
+}
+arma
+```
+
+### Dengan arima.sim
+```{r}
+arma11 <- arima.sim(list(order=c(2,0,2), ar = c(0.5,0.2), ma = c(0.4,0.6)), n=300)
+arma11
+```
+
+## Plot
+
+### Plot Time Series
+```{r}
+ts.plot(arma11)
+```
+
+### Plot ACF dan PACF
+```{r}
+par(mfrow = c(1, 2))
+acf(arma11)
+pacf(arma11)
+```
+
+### Plot EACF
+```{r}
+TSA::eacf(arma11)
+```
+
+Berdasarkan plot time series, pergerakan data bangkitan berada di sekitar rataan konstan $E[Y_t] = 0$. Hal ini menunjukkan bahwa data ARMA(2,2) yang dibangkitkan stasioner dalam rataan.
+
+Plot ACF dan PACF keduanya menunjukkan tail off yang menunjukkan bahwa data bangkitan merupakan proses ARMA(p,q) (sesuia dengan teori).
+
+Berdasarkan pola segitiga nol pada plot EACF, terlihat bahwa pola segitiga nol berada pada AR(1) dan MA(1). Hal ini menunjukkan bahwa data bangkitan bukan merupakan proses ARMA(2,2).
+
+## Scatter Plot
+
+### Antara $Y_t$ dengan $Y_{t-1}$
+```{r}
+#Yt
+yt_arma <- arma11[-1]
+yt_arma
+
+#Yt-1
+yt_1_arma <- arma11[-300]
+yt_1_arma
+```
+
+```{r}
+plot(y=yt_arma,x=yt_1_arma)
+```
+
+### Antara $Y_t$ dengan $Y_{t-2}$
+```{r}
+#Yt
+yt_arma2 <- arma11[-c(1,2)]
+yt_arma2
+
+#Yt-1
+yt_2_arma <- arma11[-c(299,300)]
+yt_2_arma
+```
+
+```{r}
+plot(y=yt_arma2,x=yt_2_arma)
+```
+
+### Antara $Y_t$ dengan $Y_{t-3}$
+```{r}
+#Yt
+yt_arma3 <- arma11[-c(1,2,3)]
+yt_arma3
+
+#Yt-1
+yt_3_arma <- arma11[-c(298,299,300)]
+yt_3_arma
+```
+
+```{r}
+plot(y=yt_arma3,x=yt_3_arma)
+```
+
+## Autokorelasi
+
+### Antara $Y_t$ dengan $Y_{t-1}$
+```{r}
+cor(yt_arma,yt_1_arma)
+```
+
+### Antara $Y_t$ dengan $Y_{t-2}$
+```{r}
+cor(yt_arma2,yt_2_arma)
+```
+
+### Antara $Y_t$ dengan $Y_{t-3}$
+```{r}
+cor(yt_arma3,yt_3_arma)
+```
+
+### Teoritis
+
+$$\gamma_0 = \phi_1 \gamma_1 + \phi_2 \gamma_2 + \sigma^2 \left[ 1 + \theta_1(\phi_1 + \theta_1) + \theta_2(\phi_1^2 + \phi_2 + \phi_1\theta_1 + \theta_2) \right] \\$$
+
+$$\gamma_1 = \phi_1 \gamma_0 + \phi_2 \gamma_1 + \sigma^2 \left[ \theta_1 + \theta_2(\phi_1 + \theta_1) \right] \\$$
+
+$$\gamma_2 = \phi_1 \gamma_1 + \phi_2 \gamma_0 + \sigma^2 \theta_2$$
+
+Korelasi teoritis didapatkan dengan:
+
+$\rho_k = \frac{\gamma_k}{\gamma_0}$ untuk $k < 3$ dan $\rho_k = \phi_1\rho_{k-1} + \phi_2\rho_{k-2}$ untuk $k\ge3$
+
+Sehingga berdasarkan pendekatan teoritis nilai korelasi:
+$\rho_1 = 0.8592$, $\rho_2 = 0.7492$, dan $\rho_3 = 0.5464$
+
+Berdasarkan Scatter plot:
+
+Hubungan $Y_t$ dan $Y_{t-1}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.837 dan berdekatan dengan korelasi secara teoritis = 0.859.
+
+Hubungan $Y_t$ dan $Y_{t-2}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.735 dan berdekatan dengan korelasi secara teoritis = 0.749.
+
+Hubungan $Y_t$ dan $Y_{t-3}$ bernilai positif, hal tersebut ditunjukkan juga dengan nilai korelasi data bangkitan = 0.516 dan berdekatan dengan nilai korelasi secara teoritis = 0.546.
